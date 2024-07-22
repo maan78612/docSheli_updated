@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1037569311056",
+    "project_id": "docsheli-7a1b5",
+    "storage_bucket": "docsheli-7a1b5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1037569311056:android:d44b0460fa134a2a266c55",
+        "android_client_info": {
+          "package_name": "com.xenonsoft.docsheli"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlNBf2bNJZ4-GYfyOmX06XTIQOt_iH9qw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
