@@ -13,7 +13,9 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   void navigateToNext() {
     Future.delayed(Duration(seconds: 3), () {
-      Provider.of<AuthProvider>(context, listen: false).checkCurrentUser();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<AuthProvider>(context, listen: false).onInit();
+      });
     });
   }
 

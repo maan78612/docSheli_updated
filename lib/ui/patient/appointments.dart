@@ -137,14 +137,6 @@ class Appointments extends StatelessWidget {
                                           ),
                                         ),
                                         SizedBox(height: Get.height * 0.01),
-                                        Text(
-                                          "need to get this",
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 14.0,
-                                            color: const Color(0xFF51565F),
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
                                         SizedBox(height: Get.height * 0.008),
                                         Container(
                                             width: Get.width * 0.38,

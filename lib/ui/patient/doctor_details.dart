@@ -226,7 +226,7 @@ class DoctorDetails extends StatelessWidget {
                               Provider.of<AuthProvider>(context, listen: false)
                                   .appUser!
                                   .phone!,
-                          docID: "+923017797394");
+                          docID: doctor.userId);
                       check
                           ? Get.to(ReviewDoctor())
                           : Get.snackbar(

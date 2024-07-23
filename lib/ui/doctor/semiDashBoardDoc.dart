@@ -119,7 +119,7 @@ class _SemiDashBoardDocState extends State<SemiDashBoardDoc> {
               BottomNavigationBarItem(
                 icon: ImageIcon(
                   AssetImage(isDoctor
-                      ? AppConfig.images.dashProfile
+                      ? AppConfig.images.profile
                       : AppConfig.images.btmMedical),
                   color: _selectedIndex == 2
                       ? Colors.black

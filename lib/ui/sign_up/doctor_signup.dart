@@ -9,7 +9,6 @@ import 'package:docsheli/providers/doctor.dart';
 import 'package:docsheli/ui/shared/globals/global_classes.dart';
 import 'package:docsheli/ui/shared/globals/global_variables.dart';
 import 'package:docsheli/utils/app_user.dart';
-import 'package:docsheli/utils/app_utils.dart';
 import 'package:docsheli/utils/enums.dart';
 import 'package:docsheli/utils/show_message.dart';
 import 'package:docsheli/utils/validation.dart';
@@ -59,47 +58,6 @@ class _DoctorSignUpState extends State<DoctorSignUp> {
   List<String> selectedTimes = [];
   SpecialityModal? selectedSpeciality;
 
-  List<String> cats = [
-    "Cardiology",
-    "Pulmonology",
-    "Gastroenterology",
-    "Infectious Disease",
-    "Nephrology",
-    "Rheumatology",
-    "Endocrinology",
-    "Genetics",
-    "Thoraco-Vascular Surgery",
-    "Transplant Surgery",
-    "Breast Specialist",
-    "Shoulder",
-    "Knees",
-    "Spine",
-    "Hand",
-    "Retina",
-    "Cataract",
-    "Eye movement",
-    "Glaucoma",
-    "Fertility Specialist",
-    "Sports Medicine",
-    "Concierge Medicine",
-    "Integrative Medicine",
-    "Functional Medicine",
-    "Lifestyle Medicine",
-    "Pediatric",
-  ];
-
-  addCats() {
-    cats.forEach((element) async {
-      await Future.delayed(Duration(seconds: 1), () {
-        String id = AppUtils.getFreshTimeStamp();
-        SpecialityModal sp = SpecialityModal(
-            addedAt: Timestamp.now(), speciality: element, id: id);
-        FBCollections.speciality.doc(id).set(sp.toJson());
-        print("added: $element");
-      });
-    });
-  }
-
   @override
   void initState() {
     AuthProvider p = Provider.of<AuthProvider>(context, listen: false);
@@ -107,27 +65,11 @@ class _DoctorSignUpState extends State<DoctorSignUp> {
     phoneNumberController = TextEditingController(text: p.appUser?.phone ?? "");
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      p.onInit();
+      Provider.of<DoctorProvider>(context, listen: false).setTimeSlots(context);
     });
 
     fillEditForm(p);
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    Provider.of<DoctorProvider>(context, listen: false).getMorningTimeSlots(
-        context,
-        TimeOfDay(hour: 8, minute: 30),
-        TimeOfDay(hour: 11, minute: 0),
-        Duration(minutes: 30));
-
-    Provider.of<DoctorProvider>(context, listen: false).getEveningTimeSlots(
-        context,
-        TimeOfDay(hour: 17, minute: 30),
-        TimeOfDay(hour: 20, minute: 0),
-        Duration(minutes: 30));
-    super.didChangeDependencies();
   }
 
   @override
@@ -137,11 +79,7 @@ class _DoctorSignUpState extends State<DoctorSignUp> {
       return LoadingOverlay(
         isLoading: model.isLoading || d.isLoading,
         child: Scaffold(
-            bottomNavigationBar:
-                /*widget.isProfile
-                ? SizedBox()
-                : */
-                Container(
+            bottomNavigationBar: Container(
               margin: EdgeInsets.symmetric(
                   vertical: 10, horizontal: Get.width * .03),
               height: 45,
@@ -504,23 +442,83 @@ class _DoctorSignUpState extends State<DoctorSignUp> {
     );
   }
 
-// morning time slots button
+// Widget for time slot buttons
+  Widget _buildTimeSlotButton(
+      String title, bool isSelected, VoidCallback onPressed) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 3, vertical: 10),
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              spreadRadius: 2,
+              blurRadius: 3,
+              color: Colors.black.withOpacity(.06),
+            ),
+          ],
+          color: isSelected ? AppConfig.colors.themeColor : Colors.white,
+          borderRadius: BorderRadius.circular(5),
+        ),
+        height: 35,
+        child: TextButton(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ),
+          ),
+          onPressed: onPressed,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.access_time,
+                color: isSelected ? Colors.white : Colors.black,
+                size: 15,
+              ),
+              SizedBox(width: 8),
+              Text(
+                title,
+                style: AppConfig.textStyle.poppins().copyWith(
+                      color: isSelected ? Colors.white : Colors.black,
+                      fontSize: 13,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-  List<Widget> _buildMorningTimeSlots(List<String> times) {
+// Function to build time slot rows
+  List<Widget> _buildTimeSlots(List<String> times, bool isMorning) {
     List<Widget> rows = [];
     for (int i = 0; i < times.length; i += 3) {
       rows.add(
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: List.generate(3, (index) {
-            if (i + index < times.length) {
+            int currentIndex = i + index;
+            if (currentIndex < times.length) {
               return Expanded(
-                child: _morningTimeSlotButton(i + index, times[i + index]),
+                child: _buildTimeSlotButton(
+                  times[currentIndex],
+                  selectedTimes.contains(times[currentIndex]),
+                  () {
+                    setState(() {
+                      if (!selectedTimes.contains(times[currentIndex])) {
+                        selectedTimes.add(times[currentIndex]);
+                      } else {
+                        selectedTimes.remove(times[currentIndex]);
+                      }
+                    });
+                  },
+                ),
               );
             } else {
-              return Expanded(
-                  child: SizedBox
-                      .shrink()); // Empty slot if fewer than 3 items remain
+              return Expanded(child: SizedBox.shrink());
             }
           }),
         ),
@@ -529,178 +527,37 @@ class _DoctorSignUpState extends State<DoctorSignUp> {
     return rows;
   }
 
-  List<Widget> _buildEveningTimeSlots(List<String> times) {
-    List<Widget> rows = [];
-    for (int i = 0; i < times.length; i += 3) {
-      rows.add(
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(3, (index) {
-            if (i + index < times.length) {
-              return Expanded(
-                child: _eveningTimeSlotButton(i + index, times[i + index]),
-              );
-            } else {
-              return Expanded(
-                  child: SizedBox
-                      .shrink()); // Empty slot if fewer than 3 items remain
-            }
-          }),
-        ),
-      );
-    }
-    return rows;
-  }
-
-  Widget _morningTimeSlotButton(int index, String title) {
-    return Container(
-        margin: EdgeInsets.symmetric(horizontal: 3, vertical: 10),
-        child: Container(
-          decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    spreadRadius: 2,
-                    blurRadius: 3,
-                    color: Colors.black.withOpacity(.06))
-              ],
-              color: selectedTimes.contains(title)
-                  ? AppConfig.colors.themeColor
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(5)),
-          height: 35,
-          child: TextButton(
-            style: ButtonStyle(
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.access_time,
-                  color: selectedTimes.contains(title)
-                      ? Colors.white
-                      : Colors.black,
-                  size: 15,
-                ),
-                SizedBox(
-                  width: 8,
-                ),
-                Text(
-                  title,
-                  style: AppConfig.textStyle.poppins().copyWith(
-                      color: selectedTimes.contains(title)
-                          ? Colors.white
-                          : Colors.black,
-                      fontSize: 13),
-                ),
-              ],
-            ),
-            onPressed: () {
-              // model.morningTimeSelectedFunc(index);
-              setState(() {
-                if (!selectedTimes.contains(title)) {
-                  selectedTimes.add(title);
-                } else {
-                  selectedTimes.remove(title);
-                }
-              });
-            },
-          ),
-        ));
-  }
-
-  // evening time slots button
-  Widget _eveningTimeSlotButton(int index, String title) {
-    return Container(
-        margin: EdgeInsets.symmetric(horizontal: 3, vertical: 10),
-        child: Container(
-          decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    spreadRadius: 2,
-                    blurRadius: 3,
-                    color: Colors.black.withOpacity(.06))
-              ],
-              color: selectedTimes.contains(title)
-                  ? AppConfig.colors.themeColor
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(5)),
-          height: 35,
-          width: 100,
-          child: TextButton(
-            style: ButtonStyle(
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.access_time,
-                    color: selectedTimes.contains(title)
-                        ? Colors.white
-                        : Colors.black,
-                    size: 15),
-                SizedBox(width: 8),
-                Text(
-                  title,
-                  style: AppConfig.textStyle.poppins().copyWith(
-                      color: selectedTimes.contains(title)
-                          ? Colors.white
-                          : Colors.black,
-                      fontSize: 13),
-                ),
-              ],
-            ),
-            onPressed: () {
-              // model.eveningTimeSelectedFunc(index);
-              setState(() {
-                if (!selectedTimes.contains(title)) {
-                  selectedTimes.add(title);
-                } else {
-                  selectedTimes.remove(title);
-                }
-              });
-            },
-          ),
-        ));
-  }
-
-  // time slots main card
+// Widget for the time slots main card
   Widget _timeSlotsMainCard(AuthProvider model, DoctorProvider docProvider) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: Get.width * .05),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 10),
-            child: Text(
-              "Time Slots",
-              style: AppConfig.textStyle.poppins().copyWith(
+          SizedBox(height: 10),
+          Text(
+            "Time Slots",
+            style: AppConfig.textStyle.poppins().copyWith(
                   fontSize: Get.width * .05,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black),
-            ),
+                  color: Colors.black,
+                ),
           ),
+          SizedBox(height: 10),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: List.generate(daysList.length, (index) {
+              children: daysList.map((day) {
+                bool isSelected = selectedDays.contains(day);
                 return Padding(
                   padding: const EdgeInsets.all(6.0),
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        if (!selectedDays.contains(daysList[index])) {
-                          selectedDays.add(daysList[index]);
+                        if (isSelected) {
+                          selectedDays.remove(day);
                         } else {
-                          selectedDays.remove(daysList[index]);
+                          selectedDays.add(day);
                         }
                       });
                     },
@@ -708,55 +565,48 @@ class _DoctorSignUpState extends State<DoctorSignUp> {
                       height: 72,
                       width: 64,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: selectedDays.contains(daysList[index])
-                              ? AppConfig.colors.themeColor
-                              : Colors.transparent),
+                        borderRadius: BorderRadius.circular(12),
+                        color: isSelected
+                            ? AppConfig.colors.themeColor
+                            : Colors.transparent,
+                      ),
                       child: Center(
-                          child: Text(
-                        daysList[index],
-                        style: TextStyle(
-                            color: selectedDays.contains(daysList[index])
-                                ? Colors.white
-                                : Colors.black),
-                      )),
+                        child: Text(
+                          day,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 );
-              }),
+              }).toList(),
             ),
           ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              margin: EdgeInsets.only(top: 15, left: 6),
-              child: Text(
-                "Morning",
-                style: AppConfig.textStyle.poppins().copyWith(
-                    fontSize: Get.width * .04,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              ),
-            ),
+          SizedBox(height: 15),
+          Text(
+            "Morning",
+            style: AppConfig.textStyle.poppins().copyWith(
+                  fontSize: Get.width * .04,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
           ),
           Column(
-            children: _buildMorningTimeSlots(docProvider.morningTimes),
+            children: _buildTimeSlots(docProvider.morningTimes, true),
           ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              margin: EdgeInsets.only(top: 15, left: 6),
-              child: Text(
-                "Evening",
-                style: AppConfig.textStyle.poppins().copyWith(
-                    fontSize: Get.width * .04,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              ),
-            ),
+          SizedBox(height: 15),
+          Text(
+            "Evening",
+            style: AppConfig.textStyle.poppins().copyWith(
+                  fontSize: Get.width * .04,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
           ),
           Column(
-            children: _buildEveningTimeSlots(docProvider.eveningTimes),
+            children: _buildTimeSlots(docProvider.eveningTimes, false),
           ),
         ],
       ),

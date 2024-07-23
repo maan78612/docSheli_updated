@@ -69,7 +69,7 @@ class FieldValidator {
   }
 
   static String? validatePin(String? value) {
-    print("validatePin : $value ");
+
 
     if (value != null) {
       if (value.isEmpty) return "Enter OTP";
@@ -85,7 +85,7 @@ class FieldValidator {
   }
 
   static String? validateExp(String? value) {
-    print("validateExp : $value ");
+
 
     if (value != null) {
       if (value.isEmpty) return "Enter number of years";

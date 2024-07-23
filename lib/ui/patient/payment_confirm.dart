@@ -1,20 +1,21 @@
 import 'package:docsheli/constants/app_constants.dart';
-import 'package:docsheli/modal/appointment_success_data.dart';
+
 import 'package:docsheli/ui/patient/semi_dashbooard.dart';
 import 'package:docsheli/utils/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 class PaymentConfirm extends StatelessWidget {
-  final AptSuccessData apt;
+  final String doctorName;
+  final DateTime date;
+  final bool isVideo;
 
-  PaymentConfirm({required this.apt});
+  PaymentConfirm(
+      {required this.doctorName, required this.date, required this.isVideo});
 
   final DateTime now = DateTime.now();
-  String formattedDate = "";
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class PaymentConfirm extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Dr. ${apt.doctorName ?? ""}',
+                'Dr. ${doctorName}',
                 style: GoogleFonts.roboto(
                   fontSize: 16.0,
                   color: const Color(0xFF1C1C1C),
@@ -57,36 +58,35 @@ class PaymentConfirm extends StatelessWidget {
                 ),
               ),
               SizedBox(height: Get.height * 0.02),
-              if (apt.date != null)
-                Container(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: Get.width * 0.02,
-                        vertical: Get.height * 0.01),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(7),
-                      color: Colors.white,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "${DateFormat('EEE, dd MMM ').format(apt.date!)}",
-                          style: GoogleFonts.lato(
-                            fontSize: 25.0,
-                            color: const Color(0xFF1C1C1C),
-                          ),
+              Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: Get.width * 0.02,
+                      vertical: Get.height * 0.01),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(7),
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "${DateFormat('EEE, dd MMM ').format(date)}",
+                        style: GoogleFonts.lato(
+                          fontSize: 25.0,
+                          color: const Color(0xFF1C1C1C),
                         ),
-                        Text(
-                          "${DateFormat('hh:mm').format(apt.date!)}",
-                          style: GoogleFonts.lato(
-                            fontSize: 25.0,
-                            color: const Color(0xFF2AC052),
-                            fontWeight: FontWeight.w700,
-                          ),
+                      ),
+                      Text(
+                        "${DateFormat('hh:mm').format(date)}",
+                        style: GoogleFonts.lato(
+                          fontSize: 25.0,
+                          color: const Color(0xFF2AC052),
+                          fontWeight: FontWeight.w700,
                         ),
-                      ],
-                    )),
+                      ),
+                    ],
+                  )),
               SizedBox(height: Get.height * 0.02),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -95,7 +95,7 @@ class PaymentConfirm extends StatelessWidget {
                   Image.asset(AppConfig.images.myAppointments, scale: 3),
                   SizedBox(width: Get.width * 0.02),
                   Text(
-                    apt.isVideo ?? false
+                    isVideo
                         ? 'Online Video Consultation'
                         : "Physical Consultation",
                     style: TextStyle(
@@ -169,8 +169,8 @@ class PaymentConfirm extends StatelessWidget {
               SizedBox(height: Get.height * 0.05),
               Center(
                 child: FutureBuilder<String>(future: Future.microtask(() {
-                  String days = apt.date!.difference(now).inDays.toString();
-                  int total = apt.date!.difference(now).inHours;
+                  String days = date.difference(now).inDays.toString();
+                  int total = date.difference(now).inHours;
 
                   String hours = (total % 24).toString();
                   return "$days and $hours hours";

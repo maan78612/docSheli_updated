@@ -4,6 +4,7 @@ import 'package:docsheli/constants/app_constants.dart';
 import 'package:docsheli/modal/doctor_info.dart';
 import 'package:docsheli/modal/specialityModal.dart';
 import 'package:docsheli/modal/user_data.dart';
+import 'package:docsheli/providers/auth.dart';
 import 'package:docsheli/providers/doctor.dart';
 import 'package:docsheli/ui/shared/globals/global_classes.dart';
 import 'package:docsheli/ui/shared/globals/global_variables.dart';
@@ -144,452 +145,277 @@ class _DoctorsListState extends State<DoctorsList> {
 
   Widget doctorCard(int index, DoctorInfo doctor, DoctorProvider p) {
     String toSearch =
-        "${doctor.qualification ?? " "}".replaceAll(" ", "").toLowerCase();
-    if (toSearch.contains(searchText)) {
-      return FutureBuilder(
-          future: doctor.userRef?.get(),
-          builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-            if (!snapshot.hasData) {
-              print("no data");
-              return Shimmers.general();
-            } else {
-              print(" data");
-              UserData user = UserData.fromJson(snapshot.data?.data());
-              return FutureBuilder<SpecialityModal?>(
-                  future: p.getSpecialityById(doctor.specialityId!),
-                  builder: (context, AsyncSnapshot<SpecialityModal?> specShot) {
-                    if (!specShot.hasData) {
-                      return Shimmers.general();
-                    } else if (specShot.data == null) {
-                      return Container();
-                    } else {
-                      SpecialityModal sp = specShot.data!;
-                      bool noImage =
-                          user.imageUrl == null || (user.imageUrl??"").isEmpty;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Get.to(DoctorDetails(
-                                user: user,
-                                doctor: doctor,
-                                sp: sp,
-                              ));
-                            },
-                            child: Card(
-                              color: AppConfig.colors.cardBackGround,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              child: Container(
-                                height: Get.height * 0.335,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: Get.height * 0.015),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        CircularProfileAvatar(
-                                          noImage
-                                              ? AppUtils.userAvatar
-                                              : user.imageUrl!,
-                                          borderWidth: 1,
-                                          radius: Get.width * 0.12,
-                                          borderColor:
-                                              AppConfig.colors.themeColor,
-                                        ),
-                                        SizedBox(width: Get.width * .03),
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              '${user.name ?? "-"}',
-                                              style: GoogleFonts.roboto(
-                                                fontSize: 20.0,
-                                                color: const Color(0xFF19769F),
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            SizedBox(height: Get.height * 0.01),
-                                            Text(
-                                              "${sp.speciality ?? ""}",
-                                              style: GoogleFonts.roboto(
-                                                fontSize: 14.0,
-                                                color: const Color(0xFF51565F),
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                                height: Get.height * 0.008),
-                                            Text(
-                                              '${doctor.qualification ?? ""}',
-                                              style: TextStyle(
-                                                fontFamily: 'Gotham Rounded',
-                                                fontSize: 14.0,
-                                                color: const Color(0xFF51565F),
-                                                fontWeight: FontWeight.w300,
-                                              ),
-                                            ),
-                                            // SizedBox(
-                                            //     height: Get.height * 0.005),
-                                            // Row(
-                                            //   crossAxisAlignment:
-                                            //       CrossAxisAlignment.start,
-                                            //   mainAxisAlignment:
-                                            //       MainAxisAlignment.start,
-                                            //   children: [
-                                            //     Icon(
-                                            //       Icons.location_on_outlined,
-                                            //       color: AppConfig
-                                            //           .colors.themeColor,
-                                            //       size: 15,
-                                            //     ),
-                                            //     ConstrainedBox(
-                                            //       constraints: BoxConstraints(
-                                            //           maxWidth:
-                                            //               Get.width * 0.5),
-                                            //       child: FutureBuilder(
-                                            //           future: ls.getAddressByLatLng(
-                                            //               doctor.doctorLocation
-                                            //                       ?.lat ??
-                                            //                   "",
-                                            //               doctor.doctorLocation
-                                            //                       ?.lng ??
-                                            //                   0.0),
-                                            //           builder:
-                                            //               (context, lshot) {
-                                            //             if (!lshot.hasData) {
-                                            //               return Text("");
-                                            //             } else {
-                                            //               return Text(
-                                            //                 '${lshot.data}',
-                                            //                 maxLines: 2,
-                                            //                 overflow:
-                                            //                     TextOverflow
-                                            //                         .ellipsis,
-                                            //                 style: TextStyle(
-                                            //                   fontFamily:
-                                            //                       'Gotham Rounded',
-                                            //                   fontSize: 12.0,
-                                            //                   color: const Color(
-                                            //                       0xFF51565F),
-                                            //                   fontWeight:
-                                            //                       FontWeight
-                                            //                           .w300,
-                                            //                 ),
-                                            //               );
-                                            //             }
-                                            //           }),
-                                            //     ),
-                                            //   ],
-                                            // )
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(height: Get.height * 0.01),
-                                    if (isDoctor)
-                                      GestureDetector(
-                                        onTap: () {
-                                          Get.to(DoctorDetails(
-                                            user: user,
-                                            doctor: doctor,
-                                            sp: sp,
-                                          ));
-                                        },
-                                        child: Center(
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            width: Get.width * 0.25,
-                                            height: Get.height * .03,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(6.0),
-                                              color: Colors.white,
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black
-                                                      .withOpacity(0.44),
-                                                  offset: Offset(0, 3.0),
-                                                  blurRadius: 6.0,
-                                                ),
-                                              ],
-                                            ),
-                                            child: Text(
-                                              'View Full Profile',
-                                              style: GoogleFonts.roboto(
-                                                fontSize: 11.0,
-                                                color: const Color(0xFF1C1C1C),
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    if (!isDoctor)
-                                      SizedBox(height: Get.height * 0.01),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: Get.width * 0.05),
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  '${doctor.experience}',
-                                                  style: GoogleFonts.roboto(
-                                                    fontSize: 12.0,
-                                                    color:
-                                                        const Color(0xFF19769F),
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                                Text(
-                                                  'Experience',
-                                                  style: GoogleFonts.roboto(
-                                                    fontSize: 14.0,
-                                                    color:
-                                                        const Color(0xFF1C1C1C),
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ],
-                                            ),
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  '99%',
-                                                  style: GoogleFonts.roboto(
-                                                    fontSize: 12.0,
-                                                    color:
-                                                        const Color(0xFF19769F),
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                                Text(
-                                                  'Satisfaction',
-                                                  style: GoogleFonts.roboto(
-                                                    fontSize: 14.0,
-                                                    color:
-                                                        const Color(0xFF1C1C1C),
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                                SizedBox(
-                                                    height: Get.height * 0.01),
-                                              ],
-                                            ),
-                                          ]),
-                                    ),
-                                    Divider(
-                                      thickness: 2,
-                                    ),
-                                    SizedBox(height: Get.height * 0.01),
-                                    !isDoctor
-                                        ? Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                child: Padding(
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal:
-                                                          Get.width * 0.05),
-                                                  child: Container(
-                                                    height: Get.height * 0.05,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              4.0),
-                                                      color: Colors.white,
-                                                      border: Border.all(
-                                                        width: 1.0,
-                                                        color: const Color(
-                                                            0xFF707070),
-                                                      ),
-                                                    ),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          width:
-                                                              Get.width * 0.045,
-                                                          height:
-                                                              Get.width * 0.045,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius.all(
-                                                                    Radius.circular(
-                                                                        16.0)),
-                                                            color: AppConfig
-                                                                .colors
-                                                                .themeColor,
-                                                          ),
-                                                          child: Image.asset(
-                                                            AppConfig.images
-                                                                .videoCam,
-                                                            scale: 3.2,
-                                                          ),
-                                                        ),
-                                                        SizedBox(width: 5),
-                                                        Text(
-                                                          'Video Consultation',
-                                                          style: GoogleFonts
-                                                              .roboto(
-                                                            fontSize: 10.0,
-                                                            color: const Color(
-                                                                0xFF1C1C1C),
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                          ),
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Padding(
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal:
-                                                          Get.width * 0.05),
-                                                  child: Container(
-                                                    height: Get.height * 0.05,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              4.0),
-                                                      color: AppConfig
-                                                          .colors.themeColor,
-                                                      border: Border.all(
-                                                        width: 1.0,
-                                                        color: const Color(
-                                                            0xFF707070),
-                                                      ),
-                                                    ),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Text(
-                                                          'Book Appointment',
-                                                          style: GoogleFonts
-                                                              .roboto(
-                                                            fontSize: 12.0,
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                          ),
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : Center(
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                Get.to(DoctorDetails(
-                                                  user: user,
-                                                  doctor: doctor,
-                                                  sp: sp,
-                                                ));
-                                              },
-                                              child: Container(
-                                                width: Get.width * 0.35,
-                                                height: Get.height * 0.05,
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          4.0),
-                                                  color: AppConfig
-                                                      .colors.themeColor,
-                                                  border: Border.all(
-                                                    width: 1.0,
-                                                    color:
-                                                        const Color(0xFF707070),
-                                                  ),
-                                                ),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      'Consult Now',
-                                                      style: GoogleFonts.roboto(
-                                                        fontSize: 14.0,
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: Get.height * 0.02,
-                          )
-                        ],
-                      );
-                    }
-                  });
-            }
-          });
-    } else {
+        "${doctor.qualification ?? ""}".replaceAll(" ", "").toLowerCase();
+    if (!toSearch.contains(searchText)) {
       return SizedBox();
     }
+
+    return FutureBuilder(
+        future: doctor.userRef?.get(),
+        builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Shimmers.general();
+          } else if (!snapshot.hasData || !snapshot.data!.exists) {
+            return Text('No doctor list found');
+          }
+
+          UserData user = UserData.fromJson(snapshot.data!.data()!);
+          SpecialityModal sp = Provider.of<AuthProvider>(context, listen: false)
+              .specialities
+              .firstWhere((sp) {
+                print(sp.id);
+                print(doctor.specialityId);
+            return sp.id == doctor.specialityId!;
+          });
+          return buildDoctorCard(user, doctor, sp);
+        });
+  }
+
+  Widget buildDoctorCard(UserData user, DoctorInfo doctor, SpecialityModal sp) {
+    bool noImage = user.imageUrl == null || user.imageUrl!.isEmpty;
+
+    return GestureDetector(
+      onTap: () {
+        Get.to(DoctorDetails(
+          user: user,
+          doctor: doctor,
+          sp: sp,
+        ));
+      },
+      child: Card(
+        color: AppConfig.colors.cardBackGround,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        child: Container(
+          height: Get.height * 0.335,
+          padding: EdgeInsets.all(Get.width * 0.04),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircularProfileAvatar(
+                    noImage ? AppUtils.userAvatar : user.imageUrl!,
+                    borderWidth: 1,
+                    radius: Get.width * 0.12,
+                    borderColor: AppConfig.colors.themeColor,
+                  ),
+                  SizedBox(width: Get.width * 0.03),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name ?? "-",
+                          style: GoogleFonts.roboto(
+                            fontSize: 20.0,
+                            color: const Color(0xFF19769F),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: Get.height * 0.01),
+                        Text(
+                          sp.speciality ?? "",
+                          style: GoogleFonts.roboto(
+                            fontSize: 14.0,
+                            color: const Color(0xFF51565F),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: Get.height * 0.008),
+                        Text(
+                          doctor.qualification ?? "",
+                          style: TextStyle(
+                            fontFamily: 'Gotham Rounded',
+                            fontSize: 14.0,
+                            color: const Color(0xFF51565F),
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: Get.height * 0.01),
+              isDoctor
+                  ? buildDoctorActionButton(
+                      'View Full Profile',
+                      () => Get.to(
+                          DoctorDetails(user: user, doctor: doctor, sp: sp)),
+                    )
+                  : SizedBox(height: Get.height * 0.01),
+              buildExperienceAndSatisfaction(doctor.experience ?? 0),
+              Divider(thickness: 2),
+              isDoctor
+                  ? buildDoctorActionButton(
+                      'Consult Now',
+                      () => Get.to(
+                          DoctorDetails(user: user, doctor: doctor, sp: sp)),
+                    )
+                  : buildConsultationOptions(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildExperienceAndSatisfaction(int experience) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "$experience",
+                style: GoogleFonts.roboto(
+                  fontSize: 12.0,
+                  color: const Color(0xFF19769F),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                'Experience',
+                style: GoogleFonts.roboto(
+                  fontSize: 14.0,
+                  color: const Color(0xFF1C1C1C),
+                ),
+              ),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '99%', // Placeholder for satisfaction
+                style: GoogleFonts.roboto(
+                  fontSize: 12.0,
+                  color: const Color(0xFF19769F),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                'Satisfaction',
+                style: GoogleFonts.roboto(
+                  fontSize: 14.0,
+                  color: const Color(0xFF1C1C1C),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildDoctorActionButton(String text, VoidCallback onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: Get.width * 0.35,
+        height: Get.height * 0.05,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4.0),
+          color: AppConfig.colors.themeColor,
+          border: Border.all(
+            width: 1.0,
+            color: const Color(0xFF707070),
+          ),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: GoogleFonts.roboto(
+              fontSize: 14.0,
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildConsultationOptions() {
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+            child: Container(
+              height: Get.height * 0.05,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4.0),
+                color: Colors.white,
+                border: Border.all(
+                  width: 1.0,
+                  color: const Color(0xFF707070),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    AppConfig.images.videoCam,
+                    width: Get.width * 0.045,
+                    height: Get.width * 0.045,
+                    scale: 3.2,
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    'Video Consultation',
+                    style: GoogleFonts.roboto(
+                      fontSize: 10.0,
+                      color: const Color(0xFF1C1C1C),
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+            child: GestureDetector(
+              onTap: () {
+                // Handle booking appointment
+              },
+              child: Container(
+                height: Get.height * 0.05,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4.0),
+                  color: AppConfig.colors.themeColor,
+                  border: Border.all(
+                    width: 1.0,
+                    color: const Color(0xFF707070),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'Book Appointment',
+                    style: GoogleFonts.roboto(
+                      fontSize: 12.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

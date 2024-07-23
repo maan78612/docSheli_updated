@@ -95,18 +95,19 @@ class DoctorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // get time slots morning
-  getMorningTimeSlots(BuildContext context, TimeOfDay startTime,
-      TimeOfDay endTime, Duration duration) {
-    morningTimes = getTimes(startTime, endTime, duration)
-        .map((tod) => tod.format(context))
-        .toList();
+  void setTimeSlots(BuildContext context) {
+    morningTimes = getTimeSlots(context, TimeOfDay(hour: 8, minute: 30),
+        TimeOfDay(hour: 11, minute: 0), Duration(minutes: 30));
+
+    eveningTimes = getTimeSlots(context, TimeOfDay(hour: 17, minute: 30),
+        TimeOfDay(hour: 20, minute: 0), Duration(minutes: 30));
+    notifyListeners();
   }
 
   // get time slots evening
-  getEveningTimeSlots(BuildContext context, TimeOfDay startTime,
+  List<String> getTimeSlots(BuildContext context, TimeOfDay startTime,
       TimeOfDay endTime, Duration duration) {
-    eveningTimes = getTimes(startTime, endTime, duration)
+    return getTimes(startTime, endTime, duration)
         .map((tod) => tod.format(context))
         .toList();
   }

@@ -42,6 +42,8 @@ class AuthProvider extends ChangeNotifier {
 
   void onInit() {
     getSpeciality();
+    checkCurrentUser();
+
   }
 
   void setPinNumber(String num) {
@@ -225,9 +227,9 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> getSpeciality() async {
     startLoader();
-
+    specialities = [];
     specialities = await SpecialityServices().getSpecialities();
-
+    print("specialities = ${specialities.length}");
     stopLoader();
     notifyListeners();
   }

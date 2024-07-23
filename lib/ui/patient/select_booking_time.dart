@@ -36,35 +36,18 @@ class _SelectBookingTimeState extends State<SelectBookingTime> {
   DateTime now = DateTime.now();
   String? selectedTimeSlot;
 
-  List<DateTime> availableDays = []; //calculate according to doc availability
   getAvailableDays() {
     List<int> intDays = [];
-    doctor?.availableDays?.forEach((element) {
+    doctor?.availableDays.forEach((element) {
       var intDay = AppUtils.getWeekDayByStringDay(element);
       intDays.add(intDay);
     });
-
-    for (int i = DateTime.now().day;
-        i <= DateTime.now().add(Duration(days: 29)).day;
-        i++) {
-      print(i);
-      // print(DateTime(2021, DateTime.now().month + i, intDays.first));
-    }
   }
 
   @override
   void didChangeDependencies() {
-    Provider.of<DoctorProvider>(context, listen: false).getMorningTimeSlots(
-        context,
-        TimeOfDay(hour: 8, minute: 30),
-        TimeOfDay(hour: 11, minute: 0),
-        Duration(minutes: 30));
+    Provider.of<DoctorProvider>(context, listen: false).setTimeSlots(context);
 
-    Provider.of<DoctorProvider>(context, listen: false).getEveningTimeSlots(
-        context,
-        TimeOfDay(hour: 17, minute: 30),
-        TimeOfDay(hour: 20, minute: 0),
-        Duration(minutes: 30));
     super.didChangeDependencies();
   }
 
@@ -365,6 +348,7 @@ class _SelectBookingTimeState extends State<SelectBookingTime> {
           ),
           DatePicker(
             DateTime.now(),
+            height: 100,
             initialSelectedDate: DateTime.now(),
             selectionColor: AppConfig.colors.themeColor,
             selectedTextColor: Colors.white,

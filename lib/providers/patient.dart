@@ -6,7 +6,6 @@ import 'package:docsheli/Services/MedicalRecord/medicalRecord.dart';
 import 'package:docsheli/Services/Speciality/specialitySevices.dart';
 import 'package:docsheli/constants/firebase_collections.dart';
 import 'package:docsheli/modal/appointment.dart';
-import 'package:docsheli/modal/appointment_success_data.dart';
 import 'package:docsheli/modal/doctor_info.dart';
 import 'package:docsheli/modal/dropDown.dart';
 import 'package:docsheli/modal/medical_record.dart';
@@ -236,44 +235,43 @@ class PatientProvider extends ChangeNotifier {
   }
 
   onSubmit() async {
-    {
-      // await Get.to(StripeHome(amount: "100"));
-      if (AppUtils.paymentTrxId.isNotEmpty) {
-        // UserData user =
-        //     Provider.of<AuthProvider>(Get.context!, listen: false).appUser;
+    try {
+      // Set initial transaction ID
+      setAppointment.trxId = "TempID";
 
-        setAppointment.trxId = AppUtils.paymentTrxId;
-        TransactionsModel trx = TransactionsModel(
-            trxId: AppUtils.paymentTrxId,
-            amount: "100",
-            paidBy: AppUser.user?.phone,
-            appointmentType: setAppointment.appointmentType,
-            paidTo: setAppointment.doctorId,
-            createdAt: Timestamp.now());
-        await addAppointment();
-        await setTrxn(trx);
+      // Concurrently add appointment and set transaction
+      await Future.wait([
+        addAppointment(),
+        setPaymentInfo(),
+      ]);
 
-        AptSuccessData aptSuccessData = AptSuccessData(
-            doctorName: setAppointment.tmpDocName,
-            date: setAppointment.appointmentDate == null
-                ? DateTime.now()
-                : setAppointment.appointmentDate?.toDate(),
-            isVideo: setAppointment.appointmentType ==
-                Enums.appointmentType.videoConsultation);
-        ShowMessage.showToast(msg: "Appointment has been created successfully");
+      // Show success message
+      ShowMessage.showToast(msg: "Appointment has been created successfully");
 
-        Get.to(PaymentConfirm(
-          apt: aptSuccessData,
-        ));
-      } else {
-        ShowMessage.showToast(
-            msg: "Sorry! there was a problem processing your payment",
-            isError: true);
-      }
+      // Navigate to PaymentConfirm screen
+      Get.to(PaymentConfirm(
+        doctorName: setAppointment.tmpDocName ?? "",
+        date: setAppointment.appointmentDate?.toDate() ?? DateTime.now(),
+        isVideo: setAppointment.appointmentType ==
+            Enums.appointmentType.videoConsultation,
+      ));
+    } catch (e) {
+      print("Error during appointment submission: $e");
     }
   }
 
-  Future setTrxn(TransactionsModel trx) async {
+// Function to set transaction in Firestore
+  Future<void> setPaymentInfo() async {
+    // Create TransactionsModel instance
+    TransactionsModel trx = TransactionsModel(
+      trxId: setAppointment.trxId,
+      amount: "100",
+      paidBy: AppUser.user?.phone,
+      appointmentType: setAppointment.appointmentType,
+      paidTo: setAppointment.doctorId,
+      createdAt: Timestamp.now(),
+    );
+
     String docId = DateTime.now().microsecondsSinceEpoch.toString();
     await FBCollections.transactions.doc(docId).set(trx.toJson());
   }

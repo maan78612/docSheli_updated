@@ -26,12 +26,11 @@ class _DashBoardPatientState extends State<DashBoardPatient> {
 
   @override
   void initState() {
-    Future.delayed(Duration(milliseconds: 500), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PatientProvider>(context, listen: false).onInItDashBoard();
+      Provider.of<DoctorProvider>(context, listen: false).getAllDoctors();
     });
-    DoctorProvider p = Provider.of<DoctorProvider>(context, listen: false);
 
-    p.getAllDoctors();
     super.initState();
   }
 
@@ -140,7 +139,7 @@ class _DashBoardPatientState extends State<DashBoardPatient> {
                             1,
                             isDoctor ? "Patients" : "Records",
                             isDoctor
-                                ? AppConfig.images.patientMainImg
+                                ? AppConfig.images.patientOnBoard1
                                 : AppConfig.images.record)),
                   ],
                 ),
@@ -157,7 +156,7 @@ class _DashBoardPatientState extends State<DashBoardPatient> {
                             2,
                             isDoctor ? "Consults Other Doctor" : "Doctors",
                             isDoctor
-                                ? AppConfig.images.doctorMainImg
+                                ? AppConfig.images.doctorOnBoard1
                                 : AppConfig.images.doctor)),
                     Expanded(
                       flex: 1,
