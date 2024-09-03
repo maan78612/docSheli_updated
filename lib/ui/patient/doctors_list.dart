@@ -163,8 +163,6 @@ class _DoctorsListState extends State<DoctorsList> {
           SpecialityModal sp = Provider.of<AuthProvider>(context, listen: false)
               .specialities
               .firstWhere((sp) {
-                print(sp.id);
-                print(doctor.specialityId);
             return sp.id == doctor.specialityId!;
           });
           return buildDoctorCard(user, doctor, sp);
@@ -317,26 +315,29 @@ class _DoctorsListState extends State<DoctorsList> {
   Widget buildDoctorActionButton(String text, VoidCallback onPressed) {
     return GestureDetector(
       onTap: onPressed,
-      child: Container(
-        width: Get.width * 0.35,
-        height: Get.height * 0.05,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4.0),
-          color: AppConfig.colors.themeColor,
-          border: Border.all(
-            width: 1.0,
-            color: const Color(0xFF707070),
-          ),
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: GoogleFonts.roboto(
-              fontSize: 14.0,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+      child: Align(
+        alignment: Alignment.center,
+        child: Container(
+          width: Get.width * 0.35,
+          height: Get.height * 0.05,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4.0),
+            color: AppConfig.colors.themeColor,
+            border: Border.all(
+              width: 1.0,
+              color: const Color(0xFF707070),
             ),
-            textAlign: TextAlign.center,
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: GoogleFonts.roboto(
+                fontSize: 14.0,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ),

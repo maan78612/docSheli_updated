@@ -277,7 +277,7 @@ class _PatientSignUpState extends State<PatientSignUp> {
   }
 
   Widget _genderSelectionButtonEdit(
-      int index, DoctorProvider model, String title, img) {
+      int index, DoctorProvider model, String title, IconData img) {
     return GestureDetector(
       onTap: () {
         model.genderSelectedFunc(index);
@@ -288,7 +288,7 @@ class _PatientSignUpState extends State<PatientSignUp> {
         children: [
           CircularProfileAvatar(
             "",
-            child: Image.asset(img),
+            child: Icon(img),
             borderWidth: 1,
             radius: Get.width * 0.1,
             borderColor: model.genderSelected == index
@@ -329,19 +329,11 @@ class _PatientSignUpState extends State<PatientSignUp> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              widget.isProfile
-                  ? _genderSelectionButtonEdit(
-                      0, model, "Male", AppConfig.images.signUpMale)
-                  : _genderSelectionButton(
-                      0, model, "Male", AppConfig.images.male),
+              _genderSelectionButtonEdit(0, model, "Male", Icons.male),
               SizedBox(
                 width: !widget.isProfile ? 8 : Get.width * 0.1,
               ),
-              widget.isProfile
-                  ? _genderSelectionButtonEdit(
-                      1, model, "Female", AppConfig.images.signUpFemale)
-                  : _genderSelectionButton(
-                      1, model, "Female", AppConfig.images.female),
+              _genderSelectionButtonEdit(1, model, "Female", Icons.female)
             ],
           ),
         ],

@@ -682,13 +682,6 @@ class _DoctorSignUpState extends State<DoctorSignUp> {
     }
   }
 
-  @override
-  void dispose() {
-    AuthProvider p = Provider.of<AuthProvider>(context, listen: false);
-    p.dispose();
-    super.dispose();
-  }
-
   // fill editForm
 
   void fillEditForm(AuthProvider p) {

@@ -15,9 +15,10 @@ class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
   FocusNode numberFocus = new FocusNode();
 
   PhoneNumber initialPhoneValue = PhoneNumber(isoCode: 'IL', dialCode: "+972");
+  String phoneNumber = "";
 
   TextEditingController phoneNumberCon = TextEditingController();
-  String phoneNumber = "";
+
 
   @override
   Widget build(BuildContext context) {
